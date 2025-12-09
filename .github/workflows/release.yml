@@ -6,7 +6,7 @@ on:
       - "v*"
 
 permissions:
-  contents: write   # REQUIRED for creating GitHub Releases
+  contents: write
 
 jobs:
   build:
@@ -18,19 +18,18 @@ jobs:
         goarch: [amd64, arm64]
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Set up Go
-        uses: actions/setup-go@v4
+        uses: actions/setup-go@v5
         with:
-          go-version: "1.25"
+          go-version: "1.22"
 
       - name: Build Binary
         run: |
           mkdir -p dist
           BINARY_NAME="opsdoctor-${{ matrix.goos }}-${{ matrix.goarch }}"
 
-          # Windows needs .exe
           EXT=""
           if [ "${{ matrix.goos }}" = "windows" ]; then
             EXT=".exe"
@@ -43,7 +42,6 @@ jobs:
         run: |
           cd dist
           BINARY_NAME="opsdoctor-${{ matrix.goos }}-${{ matrix.goarch }}"
-          
           if [ "${{ matrix.goos }}" = "windows" ]; then
             zip ${BINARY_NAME}.zip ${BINARY_NAME}.exe
           else
@@ -51,7 +49,7 @@ jobs:
           fi
 
       - name: Upload zip artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: opsdoctor-${{ matrix.goos }}-${{ matrix.goarch }}
           path: dist/opsdoctor-${{ matrix.goos }}-${{ matrix.goarch }}.zip
@@ -61,10 +59,10 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Download artifacts
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           path: release-files
 
@@ -74,7 +72,7 @@ jobs:
           find . -name "*.zip" -exec sha256sum {} \; > SHA256SUMS
 
       - name: Create GitHub Release
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         with:
           files: |
             release-files/**/*.zip
