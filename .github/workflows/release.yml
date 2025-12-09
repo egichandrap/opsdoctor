@@ -1,9 +1,12 @@
-name: Build & Relase
+name: Build & Release
 
 on:
   push:
     tags:
       - "v*"
+
+permissions:
+  contents: write   # REQUIRED for creating GitHub Releases
 
 jobs:
   build:
@@ -16,18 +19,63 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
+
       - name: Set up Go
         uses: actions/setup-go@v4
         with:
-          go-version: "1.22"
+          go-version: "1.25"
 
-      - name: Build
-        run:
+      - name: Build Binary
+        run: |
           mkdir -p dist
-          GOOS=${{ matrix.goos }} GOARCH=${{ matrix.goarch }} go build -o dist/opsdoctor-${{ matrix.goos }}-${{ matrix.goarch }}
+          BINARY_NAME="opsdoctor-${{ matrix.goos }}-${{ matrix.goarch }}"
 
-      - name: Upload artifacts
+          # Windows needs .exe
+          EXT=""
+          if [ "${{ matrix.goos }}" = "windows" ]; then
+            EXT=".exe"
+          fi
+
+          GOOS=${{ matrix.goos }} GOARCH=${{ matrix.goarch }} \
+            go build -o dist/${BINARY_NAME}${EXT}
+
+      - name: Zip Artifact
+        run: |
+          cd dist
+          BINARY_NAME="opsdoctor-${{ matrix.goos }}-${{ matrix.goarch }}"
+          
+          if [ "${{ matrix.goos }}" = "windows" ]; then
+            zip ${BINARY_NAME}.zip ${BINARY_NAME}.exe
+          else
+            zip ${BINARY_NAME}.zip ${BINARY_NAME}
+          fi
+
+      - name: Upload zip artifact
         uses: actions/upload-artifact@v3
         with:
-          name: opsdoctor
-          path: /dist
+          name: opsdoctor-${{ matrix.goos }}-${{ matrix.goarch }}
+          path: dist/opsdoctor-${{ matrix.goos }}-${{ matrix.goarch }}.zip
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Download artifacts
+        uses: actions/download-artifact@v3
+        with:
+          path: release-files
+
+      - name: Generate checksums
+        run: |
+          cd release-files
+          find . -name "*.zip" -exec sha256sum {} \; > SHA256SUMS
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            release-files/**/*.zip
+            release-files/SHA256SUMS
