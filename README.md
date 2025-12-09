@@ -101,42 +101,6 @@ Install ke sistem :
 sudo cp dist/opsdoctor /usr/local/bin/
 ```
 
-
-# 📁 Struktur Project
-
-```text
-opsdoctor/
-│
-├── main.go
-├── go.mod
-├── go.sum
-│
-├── cmd/
-│   ├── root.go
-│   ├── net.go
-│   ├── tls.go
-│   ├── log.go
-│   ├── spring.go
-│   ├── api.go
-│   └── svc.go
-│
-├── internal/
-│   ├── netscan/
-│   ├── tlscheck/
-│   ├── loganalyzer/
-│   ├── springcheck/
-│   ├── apitest/
-│   └── svcchecker/
-│
-├── utils/
-│   ├── color.go
-│   ├── export.go
-│   ├── verbose.go
-│
-└── scripts/
-    └── build.sh
-```
-
 ## 📘 Cara Menggunakan
 
 Semua module mengikuti pola :
