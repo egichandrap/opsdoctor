@@ -206,13 +206,3 @@ services:
 ```bash
 opsdoctor svc check services.yaml
 ```
-
-# 🎉 Selesai
-**Jika kamu mau tambahan :**
-- Badge GitHub Actions build status
-- Banner ASCII saat CLI start
-- Contoh screenshot output (warna-warni)
-- Auto installer script (`install.sh`)
-- Homebrew formula (`brew tap`)
-
-Tinggal bilang **“lanjutkan”**.
